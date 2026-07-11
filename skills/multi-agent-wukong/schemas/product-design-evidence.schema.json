@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "product-design-evidence.schema.json",
+  "title": "Chang'e Product Design Invocation Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plugin_id", "plugin_version", "timestamp", "tool_call_id", "input_digest", "artifact_paths", "artifact_hashes", "output_validation", "confirmation_issuer", "confirmation_timestamp", "confirmation_evidence_path", "confirmation_evidence_sha256", "dependency_status"],
+  "properties": {
+    "plugin_id": { "type": "string", "minLength": 1 },
+    "plugin_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "tool_call_id": { "type": "string", "minLength": 1 },
+    "input_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "outputs": { "type": "array", "items": { "type": "string" } },
+    "artifact_paths": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "artifact_hashes": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
+    "output_validation": { "type": "object", "additionalProperties": false, "required": ["status"], "properties": { "status": { "type": "string", "enum": ["PASS", "FAIL", "PENDING"] }, "artifacts_valid": { "type": "boolean" }, "artifact_paths": { "type": "array" }, "artifact_hashes": { "type": "array" } } },
+    "confirmation_issuer": { "type": "string", "const": "USER_FACING_WUKONG" },
+    "confirmation_timestamp": { "type": "string", "minLength": 1 },
+    "confirmation_evidence_path": { "type": "string", "minLength": 1 },
+    "confirmation_evidence_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "dependency_status": { "type": "string", "enum": ["locked", "unlocked"] },
+    "blocked_code": { "type": "string", "enum": ["BLOCKED_PRODUCT_DESIGN_PLUGIN_REQUIRED", "BLOCKED_PRODUCT_DESIGN_PLUGIN_UNAVAILABLE", "BLOCKED_PRODUCT_DESIGN_INVOCATION_REQUIRED", "BLOCKED_PRODUCT_DESIGN_FALLBACK_NOT_AUTHORIZED", "BLOCKED_PRODUCT_DESIGN_CONFIRMATION_REQUIRED"] },
+    "issues": { "type": "array" },
+    "logs": { "type": "array" },
+    "validation_result": { "type": "string", "minLength": 1 }
+  }
+}

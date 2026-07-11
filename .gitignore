@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+release-evidence/*.tmp
+.pytest_cache/
+

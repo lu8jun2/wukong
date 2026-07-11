@@ -1,0 +1,35 @@
+{
+  "name": "wukong-public-staging",
+  "version": "0.1.0",
+  "description": "Coordinator-only Wukong public staging bundle for Codex.",
+  "author": {
+    "name": "lu8jun2"
+  },
+  "license": "MIT",
+  "keywords": [
+    "wukong",
+    "codex",
+    "multi-agent",
+    "governance",
+    "public-release"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Wukong",
+    "shortDescription": "Coordinator contract and public release staging bundle.",
+    "longDescription": "Wukong is a coordinator contract for Codex workflows, not an official OpenAI product. This public staging bundle ships sanitized skills, templates, contracts, and local validation helpers.",
+    "developerName": "lu8jun2",
+    "category": "Productivity",
+    "capabilities": [
+      "Coordination",
+      "Governance",
+      "Validation"
+    ],
+    "defaultPrompt": [
+      "Set up Wukong for a new project with a project-control document.",
+      "Show me the coordinator-only task package and historian handoff flow.",
+      "Validate that a Chang'e design task is blocked without Product Design invocation evidence."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

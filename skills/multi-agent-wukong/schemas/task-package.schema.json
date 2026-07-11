@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-package.schema.json",
+  "title": "Wukong Task Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_id", "role", "authorization", "control_document", "delegation_permission", "scope", "tdd", "historian", "independent_verifier", "stop_condition", "external_evaluation"],
+  "properties": {
+    "task_id": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "task_type": { "type": "string", "minLength": 1 },
+    "design_start": { "type": "boolean" },
+    "lifecycle_scale": { "type": "string", "enum": ["S", "M", "L", "XL"] },
+    "authorization": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "issuer", "parent_task_id", "confirmation_evidence"],
+      "properties": {
+        "status": { "type": "string", "const": "CONFIRMED_BY_USER" },
+        "issuer": { "type": "string", "const": "USER_FACING_WUKONG" },
+        "parent_task_id": { "type": "string", "minLength": 1 },
+        "confirmation_evidence": { "type": "string", "minLength": 1 }
+      }
+    },
+    "control_document": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "schema", "revision", "sha256", "required_sections"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "schema": { "type": "string", "const": "project-control/v1" },
+        "revision": { "type": "string", "pattern": "^r[1-9][0-9]*$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "required_sections": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "delegation_permission": { "type": "string", "enum": ["FORBIDDEN", "ALLOWED"] },
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["allowed", "forbidden"],
+      "properties": {
+        "allowed": { "type": "array", "items": { "type": "string" } },
+        "forbidden": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "tdd": {
+      "type": "object", "additionalProperties": false,
+      "required": ["phase", "evidence"],
+      "properties": {
+        "phase": { "type": "string", "enum": ["RED", "GREEN", "REFACTOR", "NOT_STARTED"] },
+        "evidence": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "historian": {
+      "type": "object", "additionalProperties": false,
+      "required": ["handoff_required", "cas_merge"],
+      "properties": {
+        "handoff_required": { "type": "boolean", "const": true },
+        "cas_merge": { "type": "boolean", "const": true },
+        "dependency_locked": { "type": "boolean" }
+      }
+    },
+    "independent_verifier": {
+      "type": "object", "additionalProperties": false,
+      "required": ["role", "required"],
+      "properties": { "role": { "type": "string", "minLength": 1 }, "required": { "type": "boolean", "const": true } }
+    },
+    "stop_condition": { "type": "string", "minLength": 1 },
+    "external_evaluation": { "type": "object", "$ref": "#/$defs/externalEvaluation" },
+    "product_design_plugin_required": { "type": "boolean" },
+    "product_design": { "$ref": "#/$defs/productDesign" },
+    "design_dependency": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "design_output_allowed"],
+      "properties": { "status": { "type": "string", "minLength": 1 }, "design_output_allowed": { "type": "boolean" } }
+    }
+  },
+  "$defs": {
+    "externalEvaluation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["available_skills", "selected_skills", "skipped_skills", "installed_specialist_roles", "agency_map", "deerflow", "professional_review", "network_use", "authorization_boundary"],
+      "properties": {
+        "available_skills": { "type": "array", "items": { "type": "string" } },
+        "selected_skills": { "type": "array", "items": { "type": "string" } },
+        "skipped_skills": { "type": "array", "items": { "oneOf": [{ "type": "string" }, { "type": "object" }] } },
+        "installed_specialist_roles": { "type": "array", "items": { "type": "string" } },
+        "available_capabilities": { "type": "array", "items": { "type": "string" } },
+        "selected_capability": { "type": "string" },
+        "invocation_required": { "type": "boolean" },
+        "agency_map": { "type": "object", "additionalProperties": true },
+        "deerflow": { "type": "object", "additionalProperties": true },
+        "professional_review": { "type": "object", "additionalProperties": true },
+        "network_use": { "type": "object", "additionalProperties": true },
+        "authorization_boundary": { "oneOf": [{ "type": "string" }, { "type": "object", "additionalProperties": true }] },
+        "agency_child_call": { "type": "boolean" }
+      }
+    },
+    "productDesign": {
+      "type": "object", "additionalProperties": false,
+      "required": ["capability_name", "resolved_plugin_id", "resolved_plugin_version", "availability", "invocation_owner", "input_brief", "input_digest", "expected_outputs", "invocation_evidence_path", "invocation_evidence_sha256", "fallback_authorization"],
+      "properties": {
+        "capability_name": { "type": "string", "minLength": 1 },
+        "resolved_plugin_id": { "type": ["string", "null"] },
+        "resolved_plugin_version": { "type": ["string", "null"] },
+        "availability": { "type": "string", "minLength": 1 },
+        "invocation_owner": { "type": "string", "minLength": 1 },
+        "input_brief": { "type": "string", "minLength": 1 },
+        "input_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "expected_outputs": { "type": "array", "items": { "type": "string" } },
+        "invocation_evidence_path": { "type": "string", "minLength": 1 },
+        "invocation_evidence_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "fallback_authorization": { "type": "object", "additionalProperties": true },
+        "expected_capability": { "type": "object", "additionalProperties": true },
+        "invocation_evidence": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}

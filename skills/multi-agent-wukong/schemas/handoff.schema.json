@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "handoff.schema.json",
+  "title": "Wukong Worker Handoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "task_id", "role", "control_document_path", "read_revision", "read_sha256", "related_sections", "modified_files", "tdd_status", "tdd_evidence", "test_command", "test_result", "issues", "bugs_logs", "hard_constraints_compliance", "conclusion", "next_step", "historian_proposal", "external_skill_agent_evaluation"],
+  "properties": {
+    "status": { "type": "string", "enum": ["DONE", "DONE_WITH_RISKS", "BLOCKED", "NEEDS_CONTEXT"] },
+    "task_id": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "control_document_path": { "type": "string", "minLength": 1 },
+    "read_revision": { "type": "string", "pattern": "^r[1-9][0-9]*$" },
+    "read_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "related_sections": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "modified_files": { "type": "array", "items": { "type": "string" } },
+    "tdd_status": { "type": "string", "enum": ["RED", "GREEN", "REFACTOR", "NOT_STARTED"] },
+    "tdd_evidence": { "type": "object", "additionalProperties": true },
+    "test_command": { "type": "string", "minLength": 1 },
+    "test_result": { "type": "object", "additionalProperties": true },
+    "issues": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+    "bugs_logs": { "type": "array", "items": { "$ref": "#/$defs/bugLog" } },
+    "hard_constraints_compliance": { "type": "string", "minLength": 1 },
+    "conclusion": { "type": "string", "minLength": 1 },
+    "next_step": { "type": "string", "minLength": 1 },
+    "historian_proposal": { "type": "string", "minLength": 1 },
+    "external_skill_agent_evaluation": { "type": "object", "$ref": "#/$defs/externalEvaluation" },
+    "product_design_invocation": { "$ref": "#/$defs/productDesignInvocation" }
+  },
+  "$defs": {
+    "bugLog": {
+      "type": "object", "additionalProperties": false,
+      "required": ["time", "command", "exit_code", "key_raw_excerpt", "raw_artifact_path", "raw_artifact_sha256", "redaction_applied", "root_cause", "disposition"],
+      "properties": {
+        "time": { "type": "string", "minLength": 1 },
+        "command": { "type": "string", "minLength": 1 },
+        "exit_code": { "type": "integer" },
+        "key_raw_excerpt": { "type": "string" },
+        "raw_artifact_path": { "type": "string", "minLength": 1 },
+        "raw_artifact_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "redaction_applied": { "type": "boolean", "const": true },
+        "root_cause": { "type": "string", "minLength": 1 },
+        "disposition": { "type": "string", "minLength": 1 }
+      }
+    },
+    "externalEvaluation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["available_skills", "selected_skills", "skipped_skills", "installed_specialist_roles", "agency_map", "deerflow", "professional_review", "network_use", "authorization_boundary"],
+      "properties": {
+        "available_skills": { "type": "array" },
+        "selected_skills": { "type": "array" },
+        "skipped_skills": { "type": "array" },
+        "installed_specialist_roles": { "type": "array" },
+        "available_capabilities": { "type": "array" },
+        "selected_capability": { "type": "string" },
+        "invocation_required": { "type": "boolean" },
+        "agency_map": { "type": "object", "additionalProperties": true },
+        "deerflow": { "type": "object", "additionalProperties": true },
+        "professional_review": { "type": "object", "additionalProperties": true },
+        "network_use": { "type": "object", "additionalProperties": true },
+        "authorization_boundary": { "oneOf": [{ "type": "string" }, { "type": "object", "additionalProperties": true }] },
+        "agency_child_call": { "type": "boolean" }
+      }
+    },
+    "productDesignInvocation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["plugin_id", "plugin_version", "timestamp", "tool_call_id", "input_digest", "outputs", "artifact_paths", "artifact_hashes", "output_validation", "confirmation_issuer", "confirmation_timestamp", "confirmation_evidence_path", "confirmation_evidence_sha256", "dependency_status", "issues", "logs"],
+      "properties": {
+        "plugin_id": { "type": "string", "minLength": 1 },
+        "plugin_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "timestamp": { "type": "string", "minLength": 1 },
+        "tool_call_id": { "type": "string", "minLength": 1 },
+        "input_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "outputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "artifact_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "artifact_hashes": { "type": "array", "items": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
+        "output_validation": {
+          "type": "object", "additionalProperties": true,
+          "required": ["status"],
+          "properties": {
+            "status": { "type": "string", "enum": ["PASS", "FAIL", "PENDING", "BLOCKED"] },
+            "artifacts_valid": { "type": "boolean" },
+            "artifact_paths": { "type": "array" },
+            "artifact_hashes": { "type": "array" }
+          }
+        },
+        "validation_result": { "type": "string", "minLength": 1 },
+        "confirmation_issuer": { "type": "string", "minLength": 1 },
+        "confirmation_timestamp": { "type": "string", "minLength": 1 },
+        "confirmation_evidence_path": { "type": "string", "minLength": 1 },
+        "confirmation_evidence_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "dependency_status": { "type": "string", "enum": ["locked", "unlocked"] },
+        "blocked_code": { "type": "string", "enum": ["BLOCKED_PRODUCT_DESIGN_PLUGIN_REQUIRED", "BLOCKED_PRODUCT_DESIGN_PLUGIN_UNAVAILABLE", "BLOCKED_PRODUCT_DESIGN_INVOCATION_REQUIRED", "BLOCKED_PRODUCT_DESIGN_FALLBACK_NOT_AUTHORIZED", "BLOCKED_PRODUCT_DESIGN_CONFIRMATION_REQUIRED"] },
+        "issues": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "logs": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

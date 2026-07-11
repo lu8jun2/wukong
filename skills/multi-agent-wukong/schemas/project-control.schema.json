@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "project-control.schema.json",
+  "title": "Wukong Project Control Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "revision", "project_root", "document_path", "sha256", "sections"],
+  "properties": {
+    "schema": { "type": "string", "const": "project-control/v1" },
+    "revision": { "type": "string", "pattern": "^r[1-9][0-9]*$" },
+    "project_root": { "type": "string", "minLength": 1 },
+    "document_path": { "type": "string", "minLength": 1 },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sections": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "goal_status": { "type": "string", "enum": ["NOT_CREATED_BY_USER_DIRECTION", "CONFIRMED", "COMPLETED", "BLOCKED"] }
+  }
+}

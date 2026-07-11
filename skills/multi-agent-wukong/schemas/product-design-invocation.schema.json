@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "product-design-invocation.schema.json",
+  "title": "Chang'e Product Design Invocation Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "remote_plugin_id",
+    "logical_plugin_id",
+    "display_name",
+    "resolved_plugin_version",
+    "metadata_path",
+    "local_cache_path",
+    "runtime_tool_exposed",
+    "runtime_status",
+    "availability",
+    "capability_name",
+    "resolved_plugin_id",
+    "fallback_authorization",
+    "invocation_owner",
+    "input_brief",
+    "input_digest",
+    "expected_outputs",
+    "invocation_evidence_path",
+    "invocation_evidence_sha256",
+    "actual_plugin_invocation",
+    "dependency_status",
+    "blocked_code"
+  ],
+  "properties": {
+    "remote_plugin_id": {
+      "type": "string",
+      "const": "Plugin_fa77aec24fc08191bc6e57f377126d76"
+    },
+    "logical_plugin_id": {
+      "type": "string",
+      "const": "product-design"
+    },
+    "display_name": {
+      "type": "string",
+      "const": "Product Design"
+    },
+    "resolved_plugin_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "metadata_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "local_cache_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "interface_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "callable_capability_surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface_type",
+          "name",
+          "path"
+        ],
+        "properties": {
+          "surface_type": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "skill",
+              "script"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "runtime_tool_exposed": {
+      "type": "boolean"
+    },
+    "runtime_status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "tool_not_exposed",
+        "auth_failed",
+        "call_failed"
+      ]
+    },
+    "availability": {
+      "type": "string",
+      "enum": [
+        "available",
+        "unavailable",
+        "auth_failed",
+        "call_failed",
+        "not_installed"
+      ]
+    },
+    "capability_name": {
+      "type": "string",
+      "const": "Product Design"
+    },
+    "resolved_plugin_id": {
+      "type": "string",
+      "const": "product-design"
+    },
+    "fallback_authorization": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "invocation_owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_brief": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "expected_outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "invocation_evidence_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "invocation_evidence_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "actual_plugin_invocation": {
+      "type": "boolean"
+    },
+    "tool_call_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "invocation_timestamp": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "artifact_hashes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "output_validation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "PENDING",
+            "BLOCKED"
+          ]
+        }
+      }
+    },
+    "confirmation_issuer": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confirmation_timestamp": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confirmation_evidence_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confirmation_evidence_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "dependency_status": {
+      "type": "string",
+      "enum": [
+        "locked",
+        "unlocked"
+      ]
+    },
+    "blocked_code": {
+      "type": "string",
+      "enum": [
+        "",
+        "BLOCKED_PRODUCT_DESIGN_PLUGIN_UNAVAILABLE",
+        "BLOCKED_PRODUCT_DESIGN_INVOCATION_REQUIRED",
+        "BLOCKED_PRODUCT_DESIGN_FALLBACK_NOT_AUTHORIZED",
+        "BLOCKED_PRODUCT_DESIGN_CONFIRMATION_REQUIRED"
+      ]
+    },
+    "availability_is_not_invocation_evidence": {
+      "type": "boolean"
+    },
+    "planned_invocation_payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "invocation_evidence": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

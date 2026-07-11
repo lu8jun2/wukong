@@ -1,0 +1,11 @@
+[features]
+multi_agent = true
+
+[agents]
+max_depth = 1
+
+[wukong]
+project_control_path = "<project-root>/docs/wukong/PROJECT-CONTROL.md"
+historian_required = true
+independent_verifier_required = true
+
