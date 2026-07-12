@@ -10,6 +10,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+WUKONG_ROOT = ROOT / "skills" / "multi-agent-wukong"
+REFS_ROOT = WUKONG_ROOT / "references"
 
 
 def joined(*parts: str) -> str:
@@ -52,6 +54,8 @@ class PublicBundleTests(unittest.TestCase):
             ROOT / "examples" / "project-AGENTS.example.md",
             ROOT / "examples" / "config.example.toml",
             ROOT / "skills" / "multi-agent-wukong" / "SKILL.md",
+            ROOT / "skills" / "multi-agent-wukong" / "references" / "agency-agent-role-map.json",
+            ROOT / "skills" / "multi-agent-wukong" / "references" / "agency-agent-role-map.md",
             ROOT / "skills" / "multi-agent-wukong" / "scripts" / "project_control_gate.py",
             ROOT / "skills" / "multi-agent-wukong" / "scripts" / "project_control_historian.py",
             ROOT / "skills" / "multi-agent-wukong" / "scripts" / "product_design_gate.py",
@@ -68,6 +72,7 @@ class PublicBundleTests(unittest.TestCase):
         manifest_path = ROOT / ".codex-plugin" / "plugin.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual("wukong-public-staging", manifest["name"])
+        self.assertEqual("0.1.2", manifest["version"])
         self.assertEqual("MIT", manifest["license"])
         self.assertEqual("./skills/", manifest["skills"])
         self.assertEqual("Wukong", manifest["interface"]["displayName"])
@@ -174,3 +179,85 @@ class PublicBundleTests(unittest.TestCase):
         suffix = joined(".", "json", "l")
         self.assertEqual("memory" + suffix, memory.path.name)
         self.assertEqual("facts" + suffix, facts.path.name)
+
+    def test_skill_requires_role_map_consultation_and_routing_matrix(self) -> None:
+        text = (WUKONG_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Role Routing Matrix", text)
+        self.assertIn("references/agency-agent-role-map.md", text)
+        self.assertIn("references/agency-agent-role-map.json", text)
+        self.assertIn("references/team-roles.md", text)
+        self.assertRegex(text, r"consult .*agency-agent-role-map")
+        self.assertIn("external specialist", text)
+        self.assertIn("secondary roles", text)
+
+    def test_team_roles_keeps_full_secondary_role_taxonomy(self) -> None:
+        text = (REFS_ROOT / "team-roles.md").read_text(encoding="utf-8")
+        required_tokens = (
+            "Harness Submodes",
+            "design-critic",
+            "core-builder",
+            "ui-director",
+            "long-researcher",
+            "deerflow-harness",
+        )
+        for token in required_tokens:
+            with self.subTest(token=token):
+                self.assertIn(token, text)
+
+    def test_dispatch_usage_and_templates_require_role_map_consultation(self) -> None:
+        dispatch_text = (REFS_ROOT / "wukong-dispatch-usage.md").read_text(encoding="utf-8")
+        template_text = (REFS_ROOT / "delegation-templates.md").read_text(encoding="utf-8")
+        for token in (
+            "agency-agent-role-map.md",
+            "agency-agent-role-map.json",
+            "Delegation permission: ALLOWED",
+            "Delegation permission: FORBIDDEN",
+            "primary role",
+            "secondary roles",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, dispatch_text)
+        for token in (
+            "agency-agent-role-map",
+            "ALLOWED",
+            "FORBIDDEN",
+            "role map",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, template_text)
+
+    def test_role_map_markdown_is_detailed_and_sanitized(self) -> None:
+        text = (REFS_ROOT / "agency-agent-role-map.md").read_text(encoding="utf-8")
+        self.assertIn("| Agent id | Agent name | Primary role | Secondary roles | Capability cluster |", text)
+        self.assertIn("3d-scene-developer", text)
+        self.assertIn("clinical-evidence-agent", text)
+        self.assertIn("体验与视觉", text)
+        for field_name in ("_".join(("source", "file")), "_".join(("source", "path"))):
+            self.assertNotIn(field_name, text)
+        for drive in "CD":
+            self.assertNotIn(drive + ":" + chr(92), text)
+        self.assertNotIn("/" + "Users" + "/", text)
+        self.assertNotIn("~/" + ".codex", text)
+
+    def test_role_map_json_is_meaningful_and_sanitized(self) -> None:
+        path = REFS_ROOT / "agency-agent-role-map.json"
+        text = path.read_text(encoding="utf-8")
+        mapping = json.loads(text)
+        self.assertGreater(mapping["agent_count"], 200)
+        self.assertGreaterEqual(len(mapping["roles"]), 10)
+        self.assertIn("嫦娥", mapping["role_counts"])
+        self.assertGreater(mapping["role_counts"]["嫦娥"], 20)
+        self.assertIn("3d-scene-developer", mapping["agents"])
+        self.assertIn("clinical-evidence-agent", mapping["agents"])
+        scene = mapping["agents"]["3d-scene-developer"]
+        self.assertEqual("嫦娥", scene["primary_role"])
+        self.assertIn("观音", scene["secondary_roles"])
+        self.assertIn("沙僧", scene["secondary_roles"])
+        self.assertTrue(scene["capability_cluster"])
+        self.assertTrue(scene["call_when"])
+        self.assertTrue(scene["boundary"])
+        for field_name in ("_".join(("source", "file")), "_".join(("source", "path"))):
+            self.assertNotIn(field_name, scene)
+        for drive in "CD":
+            self.assertNotIn(drive + ":" + chr(92), text)
+        self.assertNotIn("/" + "Users" + "/", text)

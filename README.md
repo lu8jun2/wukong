@@ -13,16 +13,17 @@ Wukong 把多代理协作约束成一套可验证的控制面：
 - 历史写回必须经过 historian handoff
 - Chang'e 设计启动必须经过 Product Design gate
 
-This bundle contains sanitized public skills, schemas, templates, examples, and local validation helpers for that contract.
+This bundle contains sanitized public skills, schemas, templates, examples, the full public role-reference tree, and local validation helpers for that contract.
 
 ## 架构 / Architecture
 
 1. `AGENTS.md`: public coordinator baseline
 2. `skills/multi-agent-wukong/`: coordinator contract, gates, schemas, templates
-3. `skills/codex-history/`: historian workflow and starter history script
-4. `docs/`: install, security, cross-platform, and control-document templates
-5. `examples/`: project-level AGENTS and config placeholders
-6. `tests/`: path-neutral smoke and contract tests
+3. `skills/multi-agent-wukong/references/`: full role-reference tree, including `team-roles.md`, `agency-agent-role-map.md`, and `agency-agent-role-map.json`
+4. `skills/codex-history/`: historian workflow and starter history script
+5. `docs/`: install, security, cross-platform, and control-document templates
+6. `examples/`: project-level AGENTS and config placeholders
+7. `tests/`: path-neutral smoke and contract tests
 
 ## 安装 / Installation
 
@@ -35,6 +36,14 @@ This bundle contains sanitized public skills, schemas, templates, examples, and 
 ```powershell
 python -m unittest discover -s tests -v
 python <plugin-creator-root>/scripts/validate_plugin.py .
+```
+
+4. Verify the full role-reference tree is present before use:
+
+```powershell
+Test-Path skills/multi-agent-wukong/references/team-roles.md
+Test-Path skills/multi-agent-wukong/references/agency-agent-role-map.md
+Test-Path skills/multi-agent-wukong/references/agency-agent-role-map.json
 ```
 
 ### macOS
@@ -50,15 +59,17 @@ Use the same flow as macOS with `python3` if your system maps that name to the a
 1. Bootstrap `<project-root>/docs/wukong/PROJECT-CONTROL.md` from the public template.
 2. Confirm scope with the user.
 3. Run `superpowers:brainstorming` for project-start and large tasks.
-4. Build a worker task packet with authorization, control-doc CAS, write scope, TDD state, external capability evaluation, and stop condition.
-5. Execute through a worker.
-6. Hand off to the historian.
-7. Run independent verification before completion.
+4. Before choosing or delegating a role, consult `skills/multi-agent-wukong/references/team-roles.md`; when an external specialist is relevant, also consult `agency-agent-role-map.md` and/or `agency-agent-role-map.json`.
+5. Build a worker task packet with authorization, control-doc CAS, write scope, TDD state, external capability evaluation, and stop condition.
+6. Execute through a worker.
+7. Hand off to the historian.
+8. Run independent verification before completion.
 
 ## 硬约束 / Hard Constraints
 
 - Wukong is coordinator-only.
 - No recursive dispatch by default.
+- The full role-reference tree is required; abbreviated role docs or missing agency-role maps are invalid.
 - No substantive work without a canonical project-control document.
 - No completion claim without independent verification evidence.
 - No design output from Chang'e before Product Design invocation evidence exists.
@@ -100,6 +111,12 @@ python scripts/redaction_scan.py --root . --out release-evidence/redaction-scan.
 python scripts/check_readme_links.py --root . --readme README.md --out release-evidence/readme-link-check.json
 python scripts/build_manifest.py --root . --out release-evidence/MANIFEST.json
 ```
+
+Role-reference tree verification is part of the public contract. A valid bundle includes:
+
+- `skills/multi-agent-wukong/references/team-roles.md`
+- `skills/multi-agent-wukong/references/agency-agent-role-map.md`
+- `skills/multi-agent-wukong/references/agency-agent-role-map.json`
 
 ## 贡献 / Contribution
 
