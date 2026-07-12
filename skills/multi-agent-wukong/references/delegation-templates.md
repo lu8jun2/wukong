@@ -2,6 +2,23 @@
 
 Use these templates to run Wukong-style multi-agent collaboration.
 
+## Protocol identity and paragraph attribution gate
+
+Every user-visible protocol output must identify the coordinator as `Role=Wukong/悟空` and include the canonical `PROJECT-CONTROL.md` path, schema `project-control/v1`, revision, SHA-256, and status. Missing or invalid control state returns `BLOCKED_CONTROL_DOC_MISSING` or an equivalent blocked status and performs zero writes except explicit `BOOTSTRAP_DOC` creation.
+
+Every task package and handoff carries `role_class`, `primary_role`, `secondary_roles`, and `role_display`. `public-historian` is dispatchable only as `secondary-only`, with an owning `primary_role` and `public-historian` in `secondary_roles`; its canonical display is `Role=Public Historian/公共史官`. A fabricated role display is invalid and must fail closed.
+
+Every visible paragraph in a handoff is bound to one attribution record with `paragraph_id`, `role_id`, `role_display`, `primary_role`, `secondary_roles`, `contribution`, `evidence_refs`, and `text_sha256`. Before acceptance, compare visible IDs, attribution IDs, and the declared count. Missing attribution, count mismatch, paragraph mismatch, or display mismatch is a fail-closed rejection.
+
+```text
+Role=Wukong/悟空
+PROJECT-CONTROL: <project-root>/docs/wukong/PROJECT-CONTROL.md
+schema: project-control/v1
+revision: rN
+sha256: <64 lowercase hex characters>
+status: VALID | BLOCKED_CONTROL_DOC_MISSING | BLOCKED_CONTROL_DOC_CORRUPT | BLOCKED_CONTROL_DOC_CONFLICT
+```
+
 ## Mandatory Confirmation Gate
 
 ```text

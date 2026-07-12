@@ -11,7 +11,7 @@ from typing import Any
 
 SENTINEL_BEGIN = "<!-- WUKONG_PUBLIC_CONTRACT:BEGIN -->"
 SENTINEL_END = "<!-- WUKONG_PUBLIC_CONTRACT:END -->"
-USER_SKILLS = ("wukong-always", "multi-agent-wukong")
+USER_SKILLS = ("wukong-always", "multi-agent-wukong", "codex-history")
 PROJECT_CONTROL_RELATIVE = Path("docs") / "wukong" / "PROJECT-CONTROL.md"
 REQUIRED_CONTROL_SECTIONS = (
     "Project Goal",
@@ -58,6 +58,8 @@ def _write_text_if_changed(path: Path, text: str, label: str, writes: list[str])
 def _sync_tree(source: Path, target: Path, label: str, writes: list[str]) -> None:
     changed = False
     for src_path in sorted(source.rglob("*")):
+        if "__pycache__" in src_path.parts or (src_path.is_file() and src_path.suffix == ".pyc"):
+            continue
         relative = src_path.relative_to(source)
         dst_path = target / relative
         if src_path.is_dir():
@@ -257,9 +259,28 @@ def run_activation(
             }
         checks.extend(project_state.get("checks", []))
 
-    user_state = _ensure_user_surface(bundle, home, verify, writes)
+    try:
+        user_state = _ensure_user_surface(bundle, home, verify, writes)
+    except ValueError as exc:
+        return {
+            "status": "BLOCKED",
+            "code": "BLOCKED_MANAGED_MARKER_CONFLICT",
+            "message": str(exc),
+            "writes": [] if verify else writes,
+            "missing": [],
+            "checks": checks,
+        }
+    except (OSError, UnicodeError) as exc:
+        return {
+            "status": "BLOCKED",
+            "code": "BLOCKED_ACTIVATION_IO",
+            "message": str(exc),
+            "writes": [] if verify else writes,
+            "missing": [],
+            "checks": checks,
+        }
     missing = list(user_state["missing"])
-    checks.extend(["user_skill:wukong-always", "user_skill:multi-agent-wukong", "user_agents:managed_block"])
+    checks.extend([*(f"user_skill:{skill_name}" for skill_name in USER_SKILLS), "user_agents:managed_block"])
 
     if verify and missing:
         return {

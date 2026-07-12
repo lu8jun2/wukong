@@ -1,8 +1,8 @@
-# Security Model
+# Security model
 
-## Boundary
+Wukong is a coordination contract, not a privilege escalation layer. `Role=Wukong/悟空` coordinates user-confirmed work; it does not perform substantive work itself. The project control path is `<project-root>/docs/wukong/PROJECT-CONTROL.md`, schema `project-control/v1`, with revision, SHA-256, and status exposed by the lifecycle commands.
 
-Wukong is a coordination contract, not a privilege escalation layer.
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.
 
 ## Controls
 
@@ -13,13 +13,10 @@ Wukong is a coordination contract, not a privilege escalation layer.
 - independent verification before completion
 - fail-closed Product Design gate
 
-## Exclusions
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.
 
-Public releases must not include:
+## Public redaction boundary
 
-- secrets or machine credentials
-- private evidence logs
-- private task dumps
-- private project outputs
-- live machine config
+Public releases must not include secrets or machine credentials, private evidence logs, private control snapshots, private task dumps, private project outputs, live machine config, session history, absolute local paths, or user credentials. `release-evidence/` is not part of the public payload, and `.wukong/` is local runtime state.
 
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.

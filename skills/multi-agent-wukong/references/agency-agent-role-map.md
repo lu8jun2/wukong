@@ -27,6 +27,14 @@ python -X utf8 <skill-root>\scripts\generate_agency_agent_role_map.py
 | 白龙马 | 9 |
 | 观音 | 43 |
 
+## Public Role Registry
+
+| Machine ID | Display | Classification | Resident role | Primary assignable |
+|---|---|---|---|---|
+| `public-historian` | Role=Public Historian/公共史官 | secondary-only | Resident role for public-package historical continuity, evidence-aware context, and handoff history. | No |
+
+Registry counts: `role_count=11`, `primary_role_count=10`, `secondary_role_count=1`.
+
 ## Full Map
 
 | Agent id | Agent name | Primary role | Secondary roles | Capability cluster |
@@ -127,7 +135,7 @@ python -X utf8 <skill-root>\scripts\generate_agency_agent_role_map.py
 | `growth-hacker` | Growth Hacker | 观音 | 太上老君 / 沙僧 | 业务与内容 |
 | `healthcare-customer-service` | Healthcare Customer Service | 观音 | 太上老君 / 沙僧 | 业务与内容 |
 | `healthcare-marketing-compliance-specialist` | Healthcare Marketing Compliance Specialist | 观音 | 太上老君 / 沙僧 | 业务与内容 |
-| `historian` | Historian | 观音 | 太上老君 / 沙僧 | 业务与内容 |
+| `historian` | Historian | 观音 | 太上老君 / 沙僧 / public-historian | 业务与内容 |
 | `hospitality-guest-services` | Hospitality Guest Services | 观音 | 太上老君 / 沙僧 | 业务与内容 |
 | `hr-onboarding` | HR Onboarding | 哪吒 | 观音 / 沙僧 | 经营合规与组织 |
 | `identity-graph-operator` | Identity Graph Operator | 二郎神 | 唐僧 / 沙僧 | 平台与后端 |

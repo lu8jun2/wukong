@@ -2,6 +2,9 @@
   "schema_version": 1,
   "generated_by": "multi-agent-wukong/scripts/generate_agency_agent_role_map.py",
   "agent_count": 243,
+  "role_count": 11,
+  "primary_role_count": 10,
+  "secondary_role_count": 1,
   "roles": {
     "悟空": {
       "cluster": "总控调度",
@@ -90,6 +93,22 @@
         "观音",
         "沙僧"
       ]
+    }
+  },
+  "public_role_registry": {
+    "role_count": 11,
+    "primary_role_count": 10,
+    "secondary_role_count": 1,
+    "roles": {
+      "public-historian": {
+        "display": "Role=Public Historian/公共史官",
+        "classification": "secondary-only",
+        "resident_role": true,
+        "primary_assignable": false,
+        "resident_role_definition": "Resident role for public-package historical continuity, evidence-aware context, and handoff history.",
+        "boundary": "May review and preserve public historical context as a secondary role; cannot be assigned as a primary role or replace the owning primary role.",
+        "secondary": []
+      }
     }
   },
   "role_counts": {
@@ -1256,7 +1275,8 @@
       "primary_role": "观音",
       "secondary_roles": [
         "太上老君",
-        "沙僧"
+        "沙僧",
+        "public-historian"
       ],
       "capability_cluster": "业务与内容",
       "call_when": "任务涉及业务策略、产品规划、内容、增长、营销、销售、社群或用户沟通。",

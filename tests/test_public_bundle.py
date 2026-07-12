@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import importlib.util
 import re
+import shutil
 import sys
 import tempfile
 import unittest
@@ -12,6 +13,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WUKONG_ROOT = ROOT / "skills" / "multi-agent-wukong"
 REFS_ROOT = WUKONG_ROOT / "references"
+
+PUBLIC_ROOT_FILES = (
+    ".gitignore",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md",
+)
+PUBLIC_ROOT_DIRECTORIES = (".codex-plugin", "docs", "examples", "scripts", "skills")
+PUBLIC_PAYLOAD_EXCLUDED_PREFIXES = (
+    "docs/wukong/",
+)
+PUBLIC_PAYLOAD_EXCLUDED_PARTS = frozenset({".git", "__pycache__", "release-evidence"})
 
 
 def joined(*parts: str) -> str:
@@ -34,6 +49,22 @@ def load_module(path: Path, name: str):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def public_payload_files() -> list[Path]:
+    """Return the explicit release payload, excluding local/private surfaces."""
+    paths = [ROOT / relative for relative in PUBLIC_ROOT_FILES]
+    for directory in PUBLIC_ROOT_DIRECTORIES:
+        paths.extend((ROOT / directory).rglob("*"))
+    selected = []
+    for path in paths:
+        if not path.is_file() or any(part in PUBLIC_PAYLOAD_EXCLUDED_PARTS for part in path.parts):
+            continue
+        relative = path.relative_to(ROOT).as_posix()
+        if any(relative.startswith(prefix) for prefix in PUBLIC_PAYLOAD_EXCLUDED_PREFIXES):
+            continue
+        selected.append(path)
+    return sorted(set(selected))
 
 
 class PublicBundleTests(unittest.TestCase):
@@ -74,7 +105,7 @@ class PublicBundleTests(unittest.TestCase):
         manifest_path = ROOT / ".codex-plugin" / "plugin.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual("wukong-public-staging", manifest["name"])
-        self.assertEqual("0.1.3", manifest["version"])
+        self.assertEqual("0.2.0", manifest["version"])
         self.assertEqual("MIT", manifest["license"])
         self.assertEqual("./skills/", manifest["skills"])
         self.assertEqual("Wukong", manifest["interface"]["displayName"])
@@ -100,21 +131,29 @@ class PublicBundleTests(unittest.TestCase):
 
     def test_public_payload_has_no_fixed_iso_timestamps(self) -> None:
         timestamp_pattern = re.compile(r"\b20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\b")
-        suffixes = {".md", ".txt", ".json", ".toml", ".py", ".yaml", ".yml", ".gitignore"}
         findings = []
-        for path in sorted(ROOT.rglob("*")):
-            if not path.is_file() or path.suffix.lower() not in suffixes:
-                continue
-            if "__pycache__" in path.parts:
-                continue
+        for path in public_payload_files():
             if timestamp_pattern.search(path.read_text(encoding="utf-8", errors="ignore")):
                 findings.append(path.relative_to(ROOT).as_posix())
         self.assertEqual([], findings)
 
     def test_redaction_scan_is_clean_without_self_false_positives(self) -> None:
         scanner = load_module(ROOT / "scripts" / "redaction_scan.py", "public_redaction_scan")
-        result = scanner.scan(ROOT)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            payload_root = Path(temp_dir)
+            for source in public_payload_files():
+                target = payload_root / source.relative_to(ROOT)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+            result = scanner.scan(payload_root)
         self.assertEqual([], result["findings"])
+
+    def test_public_payload_excludes_project_control_evidence_and_local_caches(self) -> None:
+        relative_paths = {path.relative_to(ROOT).as_posix() for path in public_payload_files()}
+        self.assertNotIn("docs/wukong/PROJECT-CONTROL.md", relative_paths)
+        self.assertFalse(any(path == "release-evidence" or path.startswith("release-evidence/") for path in relative_paths))
+        self.assertFalse(any("__pycache__" in path.split("/") for path in relative_paths))
+        self.assertFalse(any(path.startswith("docs/wukong/") for path in relative_paths))
 
     def test_redaction_scan_keeps_sensitive_pattern_coverage(self) -> None:
         scanner = load_module(ROOT / "scripts" / "redaction_scan.py", "public_redaction_scan_coverage")

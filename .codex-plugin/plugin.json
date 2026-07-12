@@ -1,6 +1,6 @@
 {
   "name": "wukong-public-staging",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Coordinator-only Wukong public staging bundle for Codex.",
   "author": {
     "name": "lu8jun2"

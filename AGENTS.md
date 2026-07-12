@@ -1,4 +1,6 @@
-Activated Wukong starts as a coordinator-only surface. The public bundle is passive until `scripts/activate_wukong.py` installs the entry skill and merges this contract into `~/.codex/AGENTS.md`.
+Activated Wukong starts as a `Role=Wukong/悟空` coordinator-only surface. The public bundle is passive until `scripts/install_wukong.py` activates the user surface; clone alone is passive and activation is required.
+
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.
 
 ## Wukong Public Baseline
 
@@ -11,8 +13,10 @@ Activated Wukong starts as a coordinator-only surface. The public bundle is pass
 - Every task packet records external capability evaluation before skills, plugins, or specialists are selected.
 - Recursive dispatch is blocked by default. `Delegation permission: FORBIDDEN` is the baseline no-recursion state.
 - Every worker handoff goes to the historian, and historian merge before final user summary is mandatory.
-- Completion requires an independent verifier that did not implement the change.
+- Completion requires independent verification by a verifier that did not implement the change.
 - `CHANG_E_PRODUCT_DESIGN_PLUGIN_GATE` is fail-closed for every Chang'e design-start task.
+
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.
 
 ## Ownership Contract
 
@@ -32,10 +36,14 @@ Every activated task packet must include the following ownership and CAS fields:
 
 Historian merge before final user summary is mandatory. Wukong reports only after the worker handoff is merged and the independent verifier has returned evidence.
 
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.
+
 ## Document Loop
 
 The document-driven loop is:
 
 `PROJECT-CONTROL -> task package -> Subagent -> historian -> verifier -> update`
 
-The public bundle documents this loop and validates it locally. It does not claim a live runtime beyond the activated install surface.
+The canonical project control fields are path `<project-root>/docs/wukong/PROJECT-CONTROL.md`, schema `project-control/v1`, revision, SHA-256, and status. The installer, doctor, and verify commands expose those fields without exposing private control snapshots.
+
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.

@@ -4,10 +4,19 @@
   "title": "Wukong Task Package",
   "type": "object",
   "additionalProperties": false,
-  "required": ["task_id", "role", "authorization", "control_document", "delegation_permission", "scope", "tdd", "historian", "independent_verifier", "stop_condition", "external_evaluation"],
+  "required": ["task_id", "role", "role_class", "primary_role", "secondary_roles", "role_display", "protocol_context", "authorization", "control_document", "delegation_permission", "scope", "tdd", "historian", "independent_verifier", "stop_condition", "external_evaluation"],
   "properties": {
     "task_id": { "type": "string", "minLength": 1 },
     "role": { "type": "string", "minLength": 1 },
+    "role_class": { "type": "string", "enum": ["primary", "secondary-only"] },
+    "primary_role": { "type": "string", "minLength": 1 },
+    "secondary_roles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "role_display": { "type": "string", "pattern": "^Role=[^\\r\\n]+$" },
+    "protocol_context": { "$ref": "#/$defs/protocolContext" },
     "task_type": { "type": "string", "minLength": 1 },
     "design_start": { "type": "boolean" },
     "lifecycle_scale": { "type": "string", "enum": ["S", "M", "L", "XL"] },
@@ -73,7 +82,67 @@
       "properties": { "status": { "type": "string", "minLength": 1 }, "design_output_allowed": { "type": "boolean" } }
     }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "role": { "const": "public-historian" } } },
+      "then": {
+        "properties": {
+          "role_class": { "const": "secondary-only" },
+          "role_display": { "const": "Role=Public Historian/公共史官" },
+          "primary_role": { "not": { "const": "public-historian" } },
+          "secondary_roles": { "contains": { "const": "public-historian" } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "role_class": { "const": "secondary-only" } } },
+      "then": {
+        "required": ["role", "primary_role", "secondary_roles", "role_display"],
+        "properties": {
+          "role": { "const": "public-historian" },
+          "role_display": { "const": "Role=Public Historian/公共史官" },
+          "secondary_roles": { "contains": { "const": "public-historian" } }
+        }
+      }
+    }
+  ],
   "$defs": {
+    "protocolContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor", "role_display", "project_control"],
+      "properties": {
+        "actor": { "const": "Wukong" },
+        "role_display": { "const": "Role=Wukong/悟空" },
+        "project_control": { "$ref": "#/$defs/projectControlContext" }
+      }
+    },
+    "projectControlContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema", "revision", "sha256", "status"],
+      "properties": {
+        "path": { "type": "string", "pattern": "(^|[/\\\\])docs[/\\\\]wukong[/\\\\]PROJECT-CONTROL\\.md$" },
+        "schema": { "const": "project-control/v1" },
+        "revision": { "type": "string", "pattern": "^(r[1-9][0-9]*|unknown)$" },
+        "sha256": { "type": "string", "pattern": "^([0-9a-f]{64}|unknown)$" },
+        "status": {
+          "type": "string",
+          "enum": ["VALID", "BLOCKED_CONTROL_DOC_MISSING", "BLOCKED_CONTROL_DOC_CORRUPT", "BLOCKED_CONTROL_DOC_CONFLICT", "BLOCKED"]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "VALID" } } },
+          "then": {
+            "properties": {
+              "revision": { "pattern": "^r[1-9][0-9]*$" },
+              "sha256": { "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        }
+      ]
+    },
     "externalEvaluation": {
       "type": "object", "additionalProperties": false,
       "required": ["available_skills", "selected_skills", "skipped_skills", "installed_specialist_roles", "agency_map", "deerflow", "professional_review", "network_use", "authorization_boundary"],

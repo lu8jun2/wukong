@@ -1,29 +1,19 @@
-# macOS Install
+# macOS install
 
-This public repository is a passive bundle until activation runs.
+This public repository is a passive bundle until activation runs. Follow [the lifecycle guide](install-lifecycle.md) for the complete five-minute path.
 
-## Activate
-
-```bash
-python3 scripts/activate_wukong.py --codex-home ~/.codex
-python3 scripts/activate_wukong.py --codex-home ~/.codex --verify
-python3 scripts/activate_wukong.py --codex-home ~/.codex --project-root <project-root> --bootstrap-doc
-python3 scripts/activate_wukong.py --codex-home ~/.codex --project-root <project-root> --verify
-```
-
-- `ACTIVATED` means the user skills were installed and the managed AGENTS block was merged.
-- `VALIDATED` means the installed surface was checked without writing.
-- Project activation requires `--project-root`.
-- Missing project `AGENTS.md` or `docs/wukong/PROJECT-CONTROL.md` fails closed unless `--bootstrap-doc` is explicitly present.
-
-## Validate
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.
 
 ```bash
-python3 -m unittest discover -s tests -v
-python3 scripts/redaction_scan.py --root . --out release-evidence/redaction-scan.json
-python3 scripts/check_readme_links.py --root . --readme README.md --out release-evidence/readme-link-check.json
+python3 -X utf8 scripts/install_wukong.py --codex-home "$HOME/.codex" --project-root "<project-root>" --bootstrap-doc
+python3 -X utf8 scripts/doctor_wukong.py --codex-home "$HOME/.codex" --project-root "<project-root>"
+python3 -X utf8 scripts/activate_wukong.py --codex-home "$HOME/.codex" --project-root "<project-root>" --verify
 ```
 
-The document-driven loop remains:
+The activation lifecycle reaches `ACTIVATED` after the managed user/project surface is installed and `VALIDATED` after the read-only verification. Expected statuses are `INSTALLED`, `HEALTHY`, and `VALIDATED`. Each result identifies `Role=Wukong/悟空` and reports `docs/wukong/PROJECT-CONTROL.md`, `project-control/v1`, revision, SHA-256, and status.
 
-`PROJECT-CONTROL -> task package -> Subagent -> historian -> verifier -> update`
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.
+
+Run validation locally with outputs kept in excluded `release-evidence/`; that directory is not part of the public payload.
+
+Attribution: `Role=Wukong/悟空`; secondary attribution: `Role=Public Historian/公共史官`.

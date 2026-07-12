@@ -2,6 +2,23 @@
 
 这份文档用于实际运行 `$multi-agent-wukong`。悟空只作为多 Agent 调度控制面，负责需求确认、任务拆分、任务板、派工、状态监控、冲突协调和结果汇总；所有实质工作由 Subagent 完成。
 
+## Protocol output, role identity, and attribution gate
+
+Every user-visible protocol output starts with the coordinator identity `Role=Wukong/悟空` and carries the live `PROJECT-CONTROL.md` path, schema `project-control/v1`, revision, SHA-256, and status. The packet and handoff `protocol_context` is the machine-readable form of this header. A missing or invalid control document returns `BLOCKED_CONTROL_DOC_MISSING` or the equivalent blocked status and performs zero writes except explicit `BOOTSTRAP_DOC` creation.
+
+Role identity is explicit in every task package and handoff: `role_class`, `primary_role`, `secondary_roles`, and `role_display`. `public-historian` is a resident `secondary-only` role. It may be dispatched with `primary_role` set to its owning primary role and `secondary_roles` containing `public-historian`; it must never be promoted to a primary role or used for recursive dispatch. Its canonical display is `Role=Public Historian/公共史官`; a fabricated role display fails closed.
+
+Every visible handoff paragraph has one attribution record containing `paragraph_id`, `role_id`, `role_display`, `primary_role`, `secondary_roles`, `contribution`, `evidence_refs`, and `text_sha256`. The verifier compares the visible paragraph IDs, attribution IDs, and declared count before accepting the handoff. Any missing attribution, count mismatch, paragraph mismatch, role-display mismatch, or fabricated role display is a fail-closed rejection.
+
+```text
+Role=Wukong/悟空
+PROJECT-CONTROL: <project-root>/docs/wukong/PROJECT-CONTROL.md
+schema: project-control/v1
+revision: rN
+sha256: <64 lowercase hex characters>
+status: VALID | BLOCKED_CONTROL_DOC_MISSING | BLOCKED_CONTROL_DOC_CORRUPT | BLOCKED_CONTROL_DOC_CONFLICT
+```
+
 ## 一句话启动
 
 在任何需要多 Agent 协作的项目里，可以这样要求 Codex：

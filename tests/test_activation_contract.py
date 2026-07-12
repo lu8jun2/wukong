@@ -265,7 +265,7 @@ class ActivationContractTests(unittest.TestCase):
     def test_plugin_version_and_role_map_counts_are_stable(self) -> None:
         manifest = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
         role_map = json.loads(ROLE_MAP.read_text(encoding="utf-8"))
-        self.assertEqual("0.1.3", manifest["version"])
+        self.assertEqual("0.2.0", manifest["version"])
         self.assertEqual(243, role_map["agent_count"])
         self.assertEqual(10, len(role_map["roles"]))
-        self.assertEqual(475, sum(len(agent["secondary_roles"]) for agent in role_map["agents"].values()))
+        self.assertEqual(476, sum(len(agent["secondary_roles"]) for agent in role_map["agents"].values()))

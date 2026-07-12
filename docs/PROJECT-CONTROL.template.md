@@ -27,6 +27,8 @@ Project-specific Goals are future-only until explicitly confirmed by the user.
 
 List the bounded paths and responsibilities.
 
+Every user-visible workflow must identify `Role=Wukong/悟空` and show the canonical control path, schema, revision, SHA-256, and status. When a public history paragraph is assembled, add the exact secondary attribution `Role=Public Historian/公共史官` immediately after the paragraph.
+
 ## 6. Hard Constraints
 
 - coordinator-only Wukong
@@ -77,6 +79,8 @@ Every worker handoff must include:
 - external capability evaluation
 - hard constraint compliance
 
+Public-facing prose must preserve per-paragraph attribution without exposing private prompts, credentials, local paths, or control snapshots. Use `Role=Wukong/悟空` for the coordinator and `Role=Public Historian/公共史官` only as the secondary historian attribution.
+
 ## 15. Verification Evidence
 
 Keep compile, tests, review, and redaction evidence references here.
@@ -84,4 +88,3 @@ Keep compile, tests, review, and redaction evidence references here.
 ## 16. Change Log
 
 Append-only history.
-

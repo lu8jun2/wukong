@@ -4,11 +4,20 @@
   "title": "Wukong Worker Handoff",
   "type": "object",
   "additionalProperties": false,
-  "required": ["status", "task_id", "role", "control_document_path", "read_revision", "read_sha256", "related_sections", "modified_files", "tdd_status", "tdd_evidence", "test_command", "test_result", "issues", "bugs_logs", "hard_constraints_compliance", "conclusion", "next_step", "historian_proposal", "external_skill_agent_evaluation"],
+  "required": ["status", "task_id", "role", "role_class", "primary_role", "secondary_roles", "role_display", "protocol_context", "control_document_path", "read_revision", "read_sha256", "related_sections", "modified_files", "tdd_status", "tdd_evidence", "test_command", "test_result", "visible_paragraph_count", "visible_paragraph_ids", "attribution", "issues", "bugs_logs", "hard_constraints_compliance", "conclusion", "next_step", "historian_proposal", "external_skill_agent_evaluation"],
   "properties": {
     "status": { "type": "string", "enum": ["DONE", "DONE_WITH_RISKS", "BLOCKED", "NEEDS_CONTEXT"] },
     "task_id": { "type": "string", "minLength": 1 },
     "role": { "type": "string", "minLength": 1 },
+    "role_class": { "type": "string", "enum": ["primary", "secondary-only"] },
+    "primary_role": { "type": "string", "minLength": 1 },
+    "secondary_roles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "role_display": { "type": "string", "pattern": "^Role=[^\\r\\n]+$" },
+    "protocol_context": { "$ref": "#/$defs/protocolContext" },
     "control_document_path": { "type": "string", "minLength": 1 },
     "read_revision": { "type": "string", "pattern": "^r[1-9][0-9]*$" },
     "read_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
@@ -18,6 +27,18 @@
     "tdd_evidence": { "type": "object", "additionalProperties": true },
     "test_command": { "type": "string", "minLength": 1 },
     "test_result": { "type": "object", "additionalProperties": true },
+    "visible_paragraph_count": { "type": "integer", "minimum": 0 },
+    "visible_paragraph_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "attribution": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/attributionRecord" }
+    },
     "issues": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
     "bugs_logs": { "type": "array", "items": { "$ref": "#/$defs/bugLog" } },
     "hard_constraints_compliance": { "type": "string", "minLength": 1 },
@@ -27,7 +48,129 @@
     "external_skill_agent_evaluation": { "type": "object", "$ref": "#/$defs/externalEvaluation" },
     "product_design_invocation": { "$ref": "#/$defs/productDesignInvocation" }
   },
+  "x-fail-closed-rules": [
+    "visible_paragraph_count must equal the number of visible_paragraph_ids and attribution records",
+    "every attribution.paragraph_id must match exactly one visible_paragraph_ids entry",
+    "role_id and role_display must resolve to the canonical role registry; reject fabricated role display",
+    "missing, mismatched, count mismatch, or paragraph mismatch attribution blocks the handoff",
+    "protocol_context.project_control.status must be BLOCKED_CONTROL_DOC_MISSING or equivalent when the control document is missing or invalid; no writes are allowed except explicit bootstrap"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "role": { "const": "public-historian" } } },
+      "then": {
+        "properties": {
+          "role_class": { "const": "secondary-only" },
+          "role_display": { "const": "Role=Public Historian/公共史官" },
+          "primary_role": { "not": { "const": "public-historian" } },
+          "secondary_roles": { "contains": { "const": "public-historian" } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "role_class": { "const": "secondary-only" } } },
+      "then": {
+        "properties": {
+          "role": { "const": "public-historian" },
+          "role_display": { "const": "Role=Public Historian/公共史官" },
+          "secondary_roles": { "contains": { "const": "public-historian" } }
+        }
+      }
+    }
+  ],
   "$defs": {
+    "protocolContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor", "role_display", "project_control"],
+      "properties": {
+        "actor": { "const": "Wukong" },
+        "role_display": { "const": "Role=Wukong/悟空" },
+        "project_control": { "$ref": "#/$defs/projectControlContext" }
+      }
+    },
+    "projectControlContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema", "revision", "sha256", "status"],
+      "properties": {
+        "path": { "type": "string", "pattern": "(^|[/\\\\])docs[/\\\\]wukong[/\\\\]PROJECT-CONTROL\\.md$" },
+        "schema": { "const": "project-control/v1" },
+        "revision": { "type": "string", "pattern": "^(r[1-9][0-9]*|unknown)$" },
+        "sha256": { "type": "string", "pattern": "^([0-9a-f]{64}|unknown)$" },
+        "status": {
+          "type": "string",
+          "enum": ["VALID", "BLOCKED_CONTROL_DOC_MISSING", "BLOCKED_CONTROL_DOC_CORRUPT", "BLOCKED_CONTROL_DOC_CONFLICT", "BLOCKED"]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "VALID" } } },
+          "then": {
+            "properties": {
+              "revision": { "pattern": "^r[1-9][0-9]*$" },
+              "sha256": { "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        }
+      ]
+    },
+    "attributionRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paragraph_id", "role_id", "role_display", "primary_role", "secondary_roles", "contribution", "evidence_refs", "text_sha256"],
+      "properties": {
+        "paragraph_id": { "type": "string", "minLength": 1 },
+        "role_id": {
+          "type": "string",
+          "enum": ["wukong", "tang-monk", "zhu-bajie", "white-dragon-horse", "chang-e", "guanyin", "taishang-laojun", "erlang-shen", "sha-seng", "nezha", "public-historian"]
+        },
+        "role_display": {
+          "type": "string",
+          "enum": [
+            "Role=Wukong/悟空",
+            "Role=Tang Monk/唐僧",
+            "Role=Zhu Bajie/猪八戒",
+            "Role=White Dragon Horse/白龙马",
+            "Role=Chang'e/嫦娥",
+            "Role=Guanyin/观音",
+            "Role=Taishang Laojun/太上老君",
+            "Role=Erlang Shen/二郎神",
+            "Role=Sha Seng/沙僧",
+            "Role=Nezha/哪吒",
+            "Role=Public Historian/公共史官"
+          ]
+        },
+        "primary_role": {
+          "type": "string",
+          "enum": ["wukong", "tang-monk", "zhu-bajie", "white-dragon-horse", "chang-e", "guanyin", "taishang-laojun", "erlang-shen", "sha-seng", "nezha"]
+        },
+        "secondary_roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["wukong", "tang-monk", "zhu-bajie", "white-dragon-horse", "chang-e", "guanyin", "taishang-laojun", "erlang-shen", "sha-seng", "nezha", "public-historian"]
+          }
+        },
+        "contribution": { "type": "string", "minLength": 1 },
+        "evidence_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "text_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "allOf": [
+        { "if": { "properties": { "role_id": { "const": "wukong" } } }, "then": { "properties": { "role_display": { "const": "Role=Wukong/悟空" } } } },
+        { "if": { "properties": { "role_id": { "const": "tang-monk" } } }, "then": { "properties": { "role_display": { "const": "Role=Tang Monk/唐僧" } } } },
+        { "if": { "properties": { "role_id": { "const": "zhu-bajie" } } }, "then": { "properties": { "role_display": { "const": "Role=Zhu Bajie/猪八戒" } } } },
+        { "if": { "properties": { "role_id": { "const": "white-dragon-horse" } } }, "then": { "properties": { "role_display": { "const": "Role=White Dragon Horse/白龙马" } } } },
+        { "if": { "properties": { "role_id": { "const": "chang-e" } } }, "then": { "properties": { "role_display": { "const": "Role=Chang'e/嫦娥" } } } },
+        { "if": { "properties": { "role_id": { "const": "guanyin" } } }, "then": { "properties": { "role_display": { "const": "Role=Guanyin/观音" } } } },
+        { "if": { "properties": { "role_id": { "const": "taishang-laojun" } } }, "then": { "properties": { "role_display": { "const": "Role=Taishang Laojun/太上老君" } } } },
+        { "if": { "properties": { "role_id": { "const": "erlang-shen" } } }, "then": { "properties": { "role_display": { "const": "Role=Erlang Shen/二郎神" } } } },
+        { "if": { "properties": { "role_id": { "const": "sha-seng" } } }, "then": { "properties": { "role_display": { "const": "Role=Sha Seng/沙僧" } } } },
+        { "if": { "properties": { "role_id": { "const": "nezha" } } }, "then": { "properties": { "role_display": { "const": "Role=Nezha/哪吒" } } } },
+        { "if": { "properties": { "role_id": { "const": "public-historian" } } }, "then": { "properties": { "role_display": { "const": "Role=Public Historian/公共史官" } } } }
+      ]
+    },
     "bugLog": {
       "type": "object", "additionalProperties": false,
       "required": ["time", "command", "exit_code", "key_raw_excerpt", "raw_artifact_path", "raw_artifact_sha256", "redaction_applied", "root_cause", "disposition"],

@@ -17,6 +17,16 @@ Use this reference when a task needs explicit role philosophy, responsibilities,
 | 沙僧 - 全能兜底者 | Full-tool worker or debugging subagent | 持戒与恢复：保留证据、修复异常、稳定交付 | 兜底处理、异常恢复、bug调试、验证支持 | Ready |
 | 哪吒 - 经营合规与组织事务官 | Finance / legal / admin / HR specialist or Agency Agents expert | 风火与规矩：快速识别财务、法务、行政、人事风险并守住边界 | 财务预算、合同初审、合规清单、行政流程、人事制度 | Ready |
 
+## Public Role Registry
+
+The public package exposes one resident secondary role in addition to the ten primary resident roles. Its machine ID is stable and it is not eligible for primary assignment.
+
+| Machine ID | Display | Classification | Resident role | Primary assignable |
+|---|---|---|---|---|
+| `public-historian` | Role=Public Historian/公共史官 | secondary-only | Resident role for public-package historical continuity, evidence-aware context, and handoff history. | No |
+
+Registry counts: `role_count=11`, `primary_role_count=10`, `secondary_role_count=1`.
+
 ## Scientific Division of Labor
 
 Use roles as work ownership, not decoration. A role is valid only when it has a specific input, output, boundary, and validation signal.
