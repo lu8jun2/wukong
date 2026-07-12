@@ -1,11 +1,23 @@
 # Plugin Install
 
-This bundle is a local public staging package.
+This repository is a passive bundle until activation runs.
 
-1. Keep the folder intact so `.codex-plugin/plugin.json` stays at the root.
-2. Run plugin validation before loading it into a local Codex environment.
-3. Install or point Codex at the bundle according to your local plugin workflow.
-4. Re-run the public tests after any contract change.
+## Local Install Flow
 
-This staging step does not publish to GitHub and does not assume a remote repository already exists.
+1. Keep `.codex-plugin/plugin.json` at the bundle root.
+2. Activate the bundle:
 
+```bash
+python scripts/activate_wukong.py --codex-home ~/.codex
+python scripts/activate_wukong.py --codex-home ~/.codex --verify
+python scripts/activate_wukong.py --codex-home ~/.codex --project-root <project-root> --bootstrap-doc
+```
+
+3. Load the bundle through your local Codex plugin workflow.
+4. Re-run the tests after any contract change.
+
+`ACTIVATED` means the user surface was written. `VALIDATED` means the existing surface passed verification without writes.
+
+The document-driven loop is:
+
+`PROJECT-CONTROL -> task package -> Subagent -> historian -> verifier -> update`

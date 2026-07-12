@@ -51,8 +51,10 @@ class PublicBundleTests(unittest.TestCase):
             ROOT / "docs" / "cross-platform.md",
             ROOT / "docs" / "security-model.md",
             ROOT / "docs" / "plugin-install.md",
+            ROOT / "scripts" / "activate_wukong.py",
             ROOT / "examples" / "project-AGENTS.example.md",
             ROOT / "examples" / "config.example.toml",
+            ROOT / "skills" / "wukong-always" / "SKILL.md",
             ROOT / "skills" / "multi-agent-wukong" / "SKILL.md",
             ROOT / "skills" / "multi-agent-wukong" / "references" / "agency-agent-role-map.json",
             ROOT / "skills" / "multi-agent-wukong" / "references" / "agency-agent-role-map.md",
@@ -72,7 +74,7 @@ class PublicBundleTests(unittest.TestCase):
         manifest_path = ROOT / ".codex-plugin" / "plugin.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual("wukong-public-staging", manifest["name"])
-        self.assertEqual("0.1.2", manifest["version"])
+        self.assertEqual("0.1.3", manifest["version"])
         self.assertEqual("MIT", manifest["license"])
         self.assertEqual("./skills/", manifest["skills"])
         self.assertEqual("Wukong", manifest["interface"]["displayName"])
@@ -86,6 +88,7 @@ class PublicBundleTests(unittest.TestCase):
             ROOT / "README.md",
             ROOT / "docs" / "PROJECT-CONTROL.template.md",
             ROOT / "examples" / "project-AGENTS.example.md",
+            ROOT / "skills" / "wukong-always" / "SKILL.md",
             ROOT / "skills" / "multi-agent-wukong" / "SKILL.md",
             ROOT / "skills" / "codex-history" / "SKILL.md",
         )

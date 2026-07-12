@@ -1,10 +1,9 @@
 # Example Project AGENTS
 
-## Project Baseline
-
 - Wukong is the visible coordinator.
-- Workers execute commands, reads, writes, tests, research, and verification.
-- No recursive dispatch unless `Delegation permission: ALLOWED`.
+- Wukong never performs substantive work.
+- All substantive actions go to Subagents.
 - Project work starts only after `<project-root>/docs/wukong/PROJECT-CONTROL.md` exists.
+- Task packages must carry authorization, control-document CAS, external capability evaluation, historian merge, independent verifier, and no-recursion.
+- Historian merge before final user summary is required.
 - Chang'e design-start tasks require Product Design invocation evidence or fail closed with `BLOCKED_PRODUCT_DESIGN_PLUGIN_UNAVAILABLE`.
-
